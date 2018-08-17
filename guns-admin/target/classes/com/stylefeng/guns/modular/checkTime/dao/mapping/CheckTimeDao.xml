@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stylefeng.guns.modular.checkTime.dao.CheckTimeDao">
+
+    <sql id="Base_Column_List">
+        t.id,
+        (CASE
+        WHEN DATE_FORMAT(t.checktime,'%H') &lt; 9 OR DATE_FORMAT(t.checktime,'%H') &gt; 17 THEN '正常'
+        WHEN DATE_FORMAT(t.checktime,'%H') &lt; 12 AND DATE_FORMAT(t.checktime,'%H') &gt; 9 THEN '迟到'
+        WHEN DATE_FORMAT(t.checktime,'%H') &lt; 18 AND DATE_FORMAT(t.checktime,'%H') &gt; 12 THEN '早退'
+        WHEN t.status = '4' THEN '旷工'
+        WHEN t.status = '5' THEN '异常'
+        WHEN t.status = '10' THEN '已审批'
+        END )AS status,
+        t.checktime AS checktime,
+        t1.account AS account,
+        t1.name AS userName,
+        (CASE
+        WHEN t1.sex = '1' THEN '男'
+        WHEN t1.sex = '2' THEN '女'
+        END) AS sex,
+        t1.birthday AS birthday,
+        t1.email AS email,
+        t1.phone AS phone,
+        t2.fullname AS deptName
+
+    </sql>
+
+    <select id="queryStaffCheckTimeList" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM check_time t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+        WHERE t1.id = #{userid}
+        <if test="flag != ''">
+         AND  TO_DAYS(t.checktime) = TO_DAYS(NOW());
+        </if>
+
+    </select>
+
+    <insert id="insertInfo">
+        INSERT INTO check_time
+        (userid,createtime,status,checktime,updatetime
+        )
+        VALUES (
+        #{userid},NOW(),#{status},NOW(),NOW()
+        )
+    </insert>
+
+    <select id="queryBossCheckTimeList" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM check_time t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+        AND t.status &lt;&gt; '1'
+
+    </select>
+
+    <update id="update">
+        UPDATE check_time SET
+        status = #{status},
+        updatetime = NOW()
+        WHERE id = #{id}
+    </update>
+
+
+
+</mapper>

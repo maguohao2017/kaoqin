@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stylefeng.guns.modular.travel.dao.TravelDao">
+    <sql id="Base_Column_List">
+        t.id,
+        (CASE
+        WHEN t.status = '1' THEN '申请'
+        WHEN t.status = '2' THEN '审批完成'
+        WHEN t.status = '3' THEN '异常'
+        END )AS status,
+        t.updatetime AS updatetime,
+        t1.account AS account,
+        t1.name AS userName,
+        (CASE
+        WHEN t1.sex = '1' THEN '男'
+        WHEN t1.sex = '2' THEN '女'
+        END) AS sex,
+        t1.birthday AS birthday,
+        t1.email AS email,
+        t1.phone AS phone,
+        t2.fullname AS deptName
+
+    </sql>
+
+    <select id="staffTravelList" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM travel t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+
+    </select>
+
+    <select id="queryEditStaff" resultType="Map">
+        SELECT remark,starttime,endtime
+        FROM travel t
+        WHERE t.id = #{id}
+
+    </select>
+
+    <insert id="addStaff">
+        INSERT INTO travel
+        (userid,createtime,status,remark,updatetime,starttime,endtime
+
+        )
+        VALUES (
+        #{userid},NOW(),#{status},#{remark},NOW(),#{starttime},#{endtime}
+
+        )
+    </insert>
+
+    <update id="editStaff" >
+        UPDATE  travel SET
+
+        <if test="remark != null and remark != ''">
+            remark = #{remark},
+        </if>
+        updatetime = now(),
+        starttime = #{starttime},
+        endtime = #{endtime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStaff">
+        DELETE FROM travel
+        WHERE id = #{id}
+    </delete>
+
+    <select id="bossTravelList" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM travel t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+
+    </select>
+
+    <select id="queryEditBoss" resultType="Map">
+        SELECT remark,starttime,endtime
+        FROM travel t
+        WHERE t.id = #{id}
+
+
+    </select>
+
+    <insert id="addBoss">
+        INSERT INTO travel
+        (userid,createtime,status,remark,updatetime,starttime,endtime
+
+        )
+        VALUES (
+        #{userid},NOW(),#{status},#{remark},NOW(),#{starttime},#{endtime}
+
+        )
+    </insert>
+
+    <update id="editBoss" >
+        UPDATE  travel SET
+
+        status = #{status},
+        updatetime = now(),
+        starttime = #{starttime},
+        endtime = #{endtime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBoss">
+        DELETE FROM travel
+        WHERE id = #{id}
+    </delete>
+
+
+
+</mapper>

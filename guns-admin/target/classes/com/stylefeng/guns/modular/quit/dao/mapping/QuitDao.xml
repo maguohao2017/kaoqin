@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.stylefeng.guns.modular.quit.dao.QuitDao">
+    <sql id="Base_Column_List">
+        t.id,
+        (CASE
+        WHEN t.status = '1' THEN '申请'
+        WHEN t.status = '2' THEN '审批完成'
+        WHEN t.status = '3' THEN '异常'
+        END )AS status,
+        t.updatetime AS updatetime,
+        t1.account AS account,
+        t1.name AS userName,
+        (CASE
+        WHEN t1.sex = '1' THEN '男'
+        WHEN t1.sex = '2' THEN '女'
+        END) AS sex,
+        t1.birthday AS birthday,
+        t1.email AS email,
+        t1.phone AS phone,
+        t2.fullname AS deptName
+
+    </sql>
+
+    <select id="quitListStaff" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM quit t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+        WHERE t1.id = #{userid}
+    </select>
+
+    <select id="queryeditStaff" resultType="String">
+        SELECT remark
+        FROM quit t
+        WHERE t.id = #{id}
+
+    </select>
+
+    <insert id="addStaffQuit">
+        INSERT INTO quit
+        (userid,createtime,status,remark,updatetime
+
+        )
+        VALUES (
+        #{userid},NOW(),#{status},#{remark},NOW()
+
+        )
+    </insert>
+
+    <update id="editStaffQuit" >
+        UPDATE  quit SET
+
+        <if test="remark != null and remark != ''">
+            remark = #{remark},
+        </if>
+        updatetime = now()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteStaffQuit">
+        DELETE FROM quit
+        WHERE id = #{id}
+    </delete>
+
+    <select id="quitBossList" resultType="map">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM quit t
+        LEFT JOIN sys_user t1
+        ON t.userid = t1.id
+        LEFT JOIN sys_dept t2
+        ON t1.deptid = t2.id
+        WHERE t2.id = #{deptId}
+    </select>
+
+    <select id="queryBossedit" resultType="String">
+        SELECT remark
+        FROM vacation t
+        WHERE t.id = #{id}
+
+    </select>
+
+    <update id="editBossQuit" >
+        UPDATE  vacation SET
+
+        status = #{status},
+        updatetime = now()
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteBossQuit">
+        DELETE FROM vacation
+        WHERE id = #{id}
+    </delete>
+
+
+
+</mapper>
